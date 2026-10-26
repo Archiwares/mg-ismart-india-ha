@@ -2,15 +2,15 @@
   "domain": "mg_ismart_india",
   "name": "MG iSMART India",
   "codeowners": [
-    "@john-lazarus"
+    "@john-lazarus",
+    "@Archiwares"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/john-lazarus/mg-ismart-india-ha",
+  "documentation": "https://github.com/Archiwares/mg-ismart-india-ha",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/john-lazarus/mg-ismart-india-ha/issues",
+  "issue_tracker": "https://github.com/Archiwares/mg-ismart-india-ha/issues",
   "requirements": [
-    "pycryptodome>=3.20.0",
-    "asn1tools>=0.167.0"
+    "mg-ismart-india-client==0.2.1"
   ],
-  "version": "0.1.11"
+  "version": "0.2.0"
 }

@@ -5,11 +5,14 @@ from homeassistant import config_entries
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import MgIndiaClient, MgIndiaApiError, hash_control_pin
 from .const import (
+    CONF_FETCH_CHARGING,
     CONF_PASSWORD,
     CONF_PHONE,
     CONF_PIN_HASH,
+    CONF_SCAN_INTERVAL,
     CONF_VEHICLE_NAME,
     CONF_VIN,
+    DEFAULT_SCAN_INTERVAL_SECONDS,
     DOMAIN,
 )
 
@@ -100,6 +103,9 @@ class MgIndiaOptionsFlow(config_entries.OptionsFlow):
             try:
                 options = {**self.config_entry.options}
                 options.update(options_from_user_input(user_input))
+                for key in (CONF_SCAN_INTERVAL, CONF_FETCH_CHARGING):
+                    if key in user_input:
+                        options[key] = user_input[key]
                 return self.async_create_entry(title="", data=options)
             except MgIndiaApiError:
                 errors["pin"] = "invalid_pin"
@@ -107,12 +113,23 @@ class MgIndiaOptionsFlow(config_entries.OptionsFlow):
             self.config_entry.options.get(CONF_PIN_HASH)
             or self.config_entry.data.get(CONF_PIN_HASH)
         )
+        current = self.config_entry.options
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
                     vol.Optional("pin"): str,
                     vol.Optional("clear_pin", default=False): bool,
+                    vol.Optional(
+                        CONF_SCAN_INTERVAL,
+                        default=current.get(
+                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_SECONDS // 60
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=1, max=60)),
+                    vol.Optional(
+                        CONF_FETCH_CHARGING,
+                        default=current.get(CONF_FETCH_CHARGING, True),
+                    ): bool,
                 }
             ),
             errors=errors,

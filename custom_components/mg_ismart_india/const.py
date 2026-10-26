@@ -4,4 +4,6 @@ CONF_PASSWORD = "password"
 CONF_PIN_HASH = "pin_hash"
 CONF_VIN = "vin"
 CONF_VEHICLE_NAME = "vehicle_name"
+CONF_SCAN_INTERVAL = "scan_interval_minutes"
+CONF_FETCH_CHARGING = "fetch_charging"
 DEFAULT_SCAN_INTERVAL_SECONDS = 180

@@ -8,7 +8,8 @@
     "climate",
     "cover",
     "button",
-    "select"
+    "select",
+    "device_tracker"
   ],
   "homeassistant": "2024.8.0"
 }

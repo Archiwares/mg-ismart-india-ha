@@ -24,9 +24,18 @@ BINS = [
 ]
 
 
+CHARGE_BINS = [
+    ("is_charging", "Charging", BinarySensorDeviceClass.BATTERY_CHARGING),
+    ("is_plugged_in", "Charger Plugged In", BinarySensorDeviceClass.PLUG),
+]
+
+
 async def async_setup_entry(hass, entry, async_add_entities):
     c = hass.data[DOMAIN][entry.entry_id]["coordinator"]
-    async_add_entities([MgIndiaBinary(c, *b) for b in BINS] + [MgCommandInProgress(c)])
+    entities = [MgIndiaBinary(c, *b) for b in BINS] + [MgCommandInProgress(c)]
+    if c.fetch_charging:
+        entities += [MgChargeBinary(c, *b) for b in CHARGE_BINS]
+    async_add_entities(entities)
 
 
 class MgIndiaBinary(MgIndiaEntity, BinarySensorEntity):
@@ -37,6 +46,17 @@ class MgIndiaBinary(MgIndiaEntity, BinarySensorEntity):
     @property
     def is_on(self):
         return getattr(self.status, self._key, None) if self.status else None
+
+
+class MgChargeBinary(MgIndiaBinary):
+    @property
+    def is_on(self):
+        if not self.status:
+            return None
+        # The vehicle sends a charging frame whenever the gun is connected, even
+        # when not charging, so no frame means unplugged.
+        charge = self.status.charge
+        return bool(charge and getattr(charge, self._key))
 
 
 class MgCommandInProgress(MgIndiaEntity, BinarySensorEntity):

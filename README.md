@@ -11,6 +11,12 @@ India-only by design: it uses the MG India TAP/gateway endpoints directly instea
 - doors/windows/boot/bonnet/lock/fuel/range/odometer/temperature/aux battery/CAN sensors
 - dynamic capability discovery
 - PIN-protected controls for climate, lock/unlock, windows, sunroof, tailgate, find-my-car, heated seats where supported
+- vehicle location as a GPS device tracker (keeps the last good fix)
+- EV battery %, charging, plugged-in, charging power/current/voltage, battery energy and charge time remaining
+- tyre pressures
+- configurable update interval and charging-data polling (Configure)
+
+This fork of [john-lazarus/mg-ismart-india-ha](https://github.com/john-lazarus/mg-ismart-india-ha) uses the published [mg-ismart-india-client](https://pypi.org/project/mg-ismart-india-client/) library instead of an embedded copy of the protocol code.
 
 This project is not affiliated with MG, SAIC, or JSW MG Motor India.
 
@@ -68,3 +74,8 @@ Retries transient malformed TAP login responses seen immediately after Home Assi
 ## v0.1.11
 
 Fixes ZS/Astor lock commands failing at PIN verification with TAP result 2 by refreshing the TAP session and retrying PIN verification once before sending the remote-control command.
+
+
+## v0.2.0
+
+Switches to the `mg-ismart-india-client` 0.2.1 library, which adds GPS, tyre and EV charging decoding and stops re-sending a remote command when MG's reply is ambiguous. Adds a Location device tracker; Battery, Charging Power/Current/Voltage, Battery Energy, Charge Time Remaining and tyre pressure sensors; Charging and Charger Plugged In binary sensors; the cabin temperature on the climate entity (so voice assistants can read it); and Configure options for the update interval and charging-data polling.

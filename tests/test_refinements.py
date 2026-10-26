@@ -3,8 +3,8 @@ from __future__ import annotations
 import asyncio
 import types
 
-from custom_components.mg_ismart_india.api.client import MgIndiaClient
-from custom_components.mg_ismart_india.api.models import (
+from mg_ismart_india_client.client import MgIndiaClient
+from mg_ismart_india_client.models import (
     Capabilities,
     Snapshot,
     Status,
@@ -68,7 +68,7 @@ def test_verify_pin_logs_in_before_pin_request(monkeypatch):
 
         monkeypatch.setattr(client, "login", login)
         monkeypatch.setattr(
-            "custom_components.mg_ismart_india.api.client.decode_pin_response",
+            "mg_ismart_india_client.client.decode_pin_response",
             lambda _text: {"result": 0},
         )
 
@@ -109,11 +109,11 @@ def test_control_polls_with_returned_event_id(monkeypatch):
 
         monkeypatch.setattr(client, "verify_pin", verify_pin)
         monkeypatch.setattr(
-            "custom_components.mg_ismart_india.api.client.encode_control_request",
+            "mg_ismart_india_client.client.encode_control_request",
             encode,
         )
         monkeypatch.setattr(
-            "custom_components.mg_ismart_india.api.client.decode_control_response",
+            "mg_ismart_india_client.client.decode_control_response",
             decode,
         )
 
@@ -294,55 +294,6 @@ def test_control_entities_unavailable_while_remote_command_running():
     assert MgClimate(coordinator, client).available is False
 
 
-def test_control_retries_once_after_bad_control_response_frame(monkeypatch):
-    async def run():
-        client = MgIndiaClient(
-            _Session(),
-            "9876543210",
-            "secret",
-            vin="VIN12345678901234",
-            pin_hash="A" * 32,
-        )
-        client.uid = "uid"
-        client.token = "token"
-        logins = []
-        decodes = [
-            ValueError("unexpected TAP v2.1 response framing"),
-            ({"result": 0}, {"rvcReqSts": b"\x02"}),
-        ]
-
-        async def verify_pin():
-            return None
-
-        async def login():
-            logins.append("login")
-            client.uid = "uid"
-            client.token = "token2"
-
-        def decode(_text):
-            item = decodes.pop(0)
-            if isinstance(item, Exception):
-                raise item
-            return item
-
-        monkeypatch.setattr(client, "verify_pin", verify_pin)
-        monkeypatch.setattr(client, "login", login)
-        monkeypatch.setattr(
-            "custom_components.mg_ismart_india.api.client.encode_control_request",
-            lambda *_args: "body",
-        )
-        monkeypatch.setattr(
-            "custom_components.mg_ismart_india.api.client.decode_control_response",
-            decode,
-        )
-
-        await client._control("Door lock", 1, [])
-
-        assert logins == ["login"]
-
-    asyncio.run(run())
-
-
 def test_login_retries_transient_bad_tap_login_frame(monkeypatch):
     async def run():
         client = MgIndiaClient(_Session(), "9876543210", "secret")
@@ -358,11 +309,11 @@ def test_login_retries_transient_bad_tap_login_frame(monkeypatch):
             return item
 
         monkeypatch.setattr(
-            "custom_components.mg_ismart_india.api.client.decode_login_response",
+            "mg_ismart_india_client.client.decode_login_response",
             decode,
         )
         monkeypatch.setattr(
-            "custom_components.mg_ismart_india.api.client.LOGIN_DELAY",
+            "mg_ismart_india_client.client.LOGIN_DELAY",
             0,
         )
 
@@ -371,36 +322,6 @@ def test_login_retries_transient_bad_tap_login_frame(monkeypatch):
         assert client.uid == "uid"
         assert client.token == "token"
         assert client.session.posts == 2
-
-    asyncio.run(run())
-
-
-def test_door_lock_treats_timeout_as_success_when_status_matches(monkeypatch):
-    async def run():
-        client = MgIndiaClient(
-            _Session(),
-            "9876543210",
-            "secret",
-            vin="VIN12345678901234",
-            pin_hash="A" * 32,
-        )
-        calls = []
-
-        async def fake_control(name, typ, params):
-            calls.append((name, typ, params))
-            from custom_components.mg_ismart_india.api.crypto import MgIndiaApiError
-
-            raise MgIndiaApiError("Door lock did not complete")
-
-        async def fake_status():
-            return Status(locked=True)
-
-        monkeypatch.setattr(client, "_control", fake_control)
-        monkeypatch.setattr(client, "status", fake_status)
-
-        await client.control_door_lock(True)
-
-        assert calls == [("Door lock", 1, [])]
 
     asyncio.run(run())
 
@@ -426,7 +347,7 @@ def test_verify_pin_refreshes_session_when_tap_returns_result_2(monkeypatch):
 
         monkeypatch.setattr(client, "login", login)
         monkeypatch.setattr(
-            "custom_components.mg_ismart_india.api.client.decode_pin_response",
+            "mg_ismart_india_client.client.decode_pin_response",
             lambda _text: responses.pop(0),
         )
 

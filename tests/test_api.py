@@ -1,14 +1,14 @@
-from custom_components.mg_ismart_india.api.crypto import (
+from mg_ismart_india_client.crypto import (
     normalize_phone,
     hash_control_pin,
     gateway_signature,
     tap_signature,
 )
-from custom_components.mg_ismart_india.api.client import (
+from mg_ismart_india_client.client import (
     parse_status,
     discover_capabilities,
 )
-from custom_components.mg_ismart_india.api.tap import (
+from mg_ismart_india_client.tap import (
     encode_status_request,
     encode_control_request,
     encode_pin_request,

@@ -44,6 +44,11 @@ class MgClimate(MgIndiaEntity, ClimateEntity):
             else HVACMode.OFF
         )
 
+    @property
+    def current_temperature(self):
+        # Lets Google Home answer "what's the temperature in the car".
+        return self.status.interior_temperature if self.status else None
+
     async def async_set_hvac_mode(self, hvac_mode):
         await self.coordinator.async_run_command(
             "Turn climate on" if hvac_mode == HVACMode.COOL else "Turn climate off",
